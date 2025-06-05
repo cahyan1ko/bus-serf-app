@@ -1,0 +1,16 @@
+vercel
+pymongo
+Flask
+flasgger
+Flask-Cors
+Flask-Mail
+Flask-Dance
+Flask-PyMongo
+python-dotenv
+authlib
+pymongo
+werkzeug
+imap-tools
+bcrypt
+PyJWT
+google-auth

@@ -1,0 +1,232 @@
+openapi: 3.0.3
+info:
+  title: Busty API
+  description: API untuk Busty app dengan otentikasi, registrasi, login, dan data cuaca.
+  version: 1.0.0
+servers:
+  - url: /api
+security:
+  - ApiKeyAuth: []
+  - BearerAuth: []
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - username
+        - email
+        - no_hp
+        - password
+      properties:
+        username:
+          type: string
+          example: johndoe
+        email:
+          type: string
+          format: email
+          example: johndoe@example.com
+        no_hp:
+          type: string
+          example: '08123456789'
+        password:
+          type: string
+          format: password
+          example: secret123
+    RegisterResponsePending:
+      type: object
+      properties:
+        status:
+          type: string
+          example: pending
+        message:
+          type: string
+          example: OTP telah dikirim ke email kamu.
+    VerifyOtpRequest:
+      type: object
+      required:
+        - otp
+      properties:
+        otp:
+          type: string
+          example: '123456'
+    VerifyOtpResponseSuccess:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        message:
+          type: string
+          example: Registrasi berhasil.
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: johndoe@example.com
+        password:
+          type: string
+          format: password
+          example: secret123
+    LoginResponseSuccess:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+        token:
+          type: string
+          example: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 64b12345f3ab12cd34e56789
+        username:
+          type: string
+          example: johndoe
+        email:
+          type: string
+          format: email
+          example: johndoe@example.com
+    ProtectedResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Berhasil mengakses endpoint terlindungi!
+        user:
+          $ref: '#/components/schemas/User'
+    WeatherData:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 64cabc1234fgh56789ijkl0
+        kab_kota:
+          type: string
+          example: Bandung
+        kecamatan:
+          type: string
+          example: Coblong
+        kelurahan:
+          type: string
+          example: Dago
+        suhu:
+          type: integer
+          example: 24
+
+paths:
+  /register:
+    post:
+      summary: Registrasi user baru (kirim OTP)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '200':
+          description: OTP dikirim ke email
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponsePending'
+        '400':
+          description: Field wajib diisi
+        '409':
+          description: Email atau username sudah terdaftar
+
+  /verify-otp:
+    post:
+      summary: Verifikasi OTP registrasi
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyOtpRequest'
+      responses:
+        '201':
+          description: Registrasi berhasil
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyOtpResponseSuccess'
+        '400':
+          description: OTP salah atau session expired
+
+  /login:
+    post:
+      summary: Login user dan dapatkan token JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login berhasil
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponseSuccess'
+        '401':
+          description: Email atau password salah
+
+  /protected:
+    get:
+      summary: Endpoint terlindungi, butuh token JWT dan API Key
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Berhasil mengakses endpoint terlindungi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProtectedResponse'
+        '401':
+          description: Unauthorized (API key/token salah atau habis waktu)
+
+  /data-cuaca:
+    get:
+      summary: Mendapatkan data cuaca (butuh token JWT dan API Key)
+      security:
+        - ApiKeyAuth: []
+        - BearerAuth: []
+      parameters:
+        - name: search_daerah
+          in: query
+          schema:
+            type: string
+          required: false
+          description: Filter pencarian berdasarkan kabupaten/kota, kecamatan, atau kelurahan
+      responses:
+        '200':
+          description: List data cuaca
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WeatherData'
+        '401':
+          description: Unauthorized (API key/token salah atau habis waktu)
