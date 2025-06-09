@@ -1,144 +1,183 @@
-{% extends 'base.html' %}
-
-{% block title %}Welcome to Busty{% endblock %}
-
-{% block content %}
+{% extends 'base.html' %} {% block title %}Welcome to Busty{% endblock %} {%
+block content %}
 
 <!-- Hero Section (Compact) -->
-<main id="home"
-  class="container mx-auto px-6 md:px-16 lg:px-32 py-32 flex-grow flex flex-col justify-center bg-gradient-to-tr from-blue-950 to-purple-900 text-white">
-  <div class="flex flex-col-reverse lg:flex-row items-center gap-10">
+<main
+    id="home"
+    class="container mx-auto px-6 md:px-16 lg:px-32 py-32 flex-grow flex flex-col justify-center bg-gradient-to-tr from-blue-950 to-purple-900 text-white"
+>
+    <div class="flex flex-col-reverse lg:flex-row items-center gap-10">
+        <!-- Kiri: Text -->
+        <div class="lg:w-1/2">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight">
+                Welcome to <span class="text-blue-400">Busty</span>
+            </h1>
+            <p class="text-base md:text-lg text-gray-300 mb-6">
+                Sistem manajemen dan pemantauan pengemudi bus. Fokus pada
+                keselamatan, efisiensi, dan manajemen armada.
+            </p>
+            <a
+                href=""
+                class="bg-white text-blue-800 font-semibold px-5 py-2.5 rounded-lg hover:bg-blue-700 hover:text-white transition duration-300 shadow-md text-sm md:text-base"
+            >
+                Download
+            </a>
+        </div>
 
-    <!-- Kiri: Text -->
-    <div class="lg:w-1/2">
-      <h1 class="text-4xl md:text-5xl font-bold mb-4 leading-tight">Welcome to <span class="text-blue-400">Busty</span>
-      </h1>
-      <p class="text-base md:text-lg text-gray-300 mb-6">
-        Sistem manajemen dan pemantauan pengemudi bus. Fokus pada keselamatan, efisiensi, dan manajemen armada.
-      </p>
-      <a href=""
-        class="bg-white text-blue-800 font-semibold px-5 py-2.5 rounded-lg hover:bg-blue-700 hover:text-white transition duration-300 shadow-md text-sm md:text-base">
-        Download
-      </a>
+        <!-- Kanan: Gambar -->
+        <div class="lg:w-1/2 flex justify-center lg:justify-end">
+            <img
+                src="/static/image/frame-app.svg"
+                alt="App Illustration"
+                class="w-[60%] md:w-[45%] lg:w-[40%] h-auto rounded-3xl shadow-lg"
+            />
+        </div>
     </div>
-
-    <!-- Kanan: Gambar -->
-    <div class="lg:w-1/2 flex justify-center lg:justify-end">
-      <img src="/static/image/frame app.svg" alt="App Illustration"
-        class="w-[60%] md:w-[45%] lg:w-[40%] h-auto rounded-3xl shadow-lg">
-
-    </div>
-  </div>
 </main>
-
 
 <!-- Tentang Aplikasi Busty (Modern Style) -->
 <section id="about" class="min-h-[85vh] py-24 bg-gray-50 flex items-center">
-  <div class="container mx-auto px-6 md:px-16">
-    <div class="grid md:grid-cols-2 gap-12 items-center">
+    <div class="container mx-auto px-6 md:px-16">
+        <div class="grid md:grid-cols-2 gap-12 items-center">
+            <!-- Ilustrasi / Gambar -->
+            <div class="flex justify-center">
+                <img
+                    src="/static/image/bus.png"
+                    alt="Tentang Busty"
+                    class="w-full max-w-md md:max-w-lg drop-shadow-xl rounded-3xl"
+                />
+            </div>
 
-      <!-- Ilustrasi / Gambar -->
-      <div class="flex justify-center">
-        <img src="/static/image/bus.png" alt="Tentang Busty"
-          class="w-full max-w-md md:max-w-lg drop-shadow-xl rounded-3xl">
-      </div>
-
-      <!-- Teks -->
-      <div>
-        <h2 class="text-5xl md:text-6xl lg:text-5xl font-extrabold text-gray-800 mb-6 leading-tight">
-          Apa itu <span class="text-indigo-600">Busty</span>?
-        </h2>
-        <p class="text-lg text-gray-600 leading-relaxed mb-4">
-          Busty adalah platform monitoring dan manajemen pengemudi bus yang mengintegrasikan AI
-          untuk mendeteksi kelelahan, mengatur rute perjalanan, serta memastikan keamanan dan efisiensi transportasi.
-        </p>
-        <p class="text-lg text-gray-600 leading-relaxed">
-          Cocok untuk operator armada yang ingin sistem modern, transparan, dan berbasis data.
-        </p>
-      </div>
-
+            <!-- Teks -->
+            <div>
+                <h2
+                    class="text-5xl md:text-6xl lg:text-5xl font-extrabold text-gray-800 mb-6 leading-tight"
+                >
+                    Apa itu <span class="text-indigo-600">Busty</span>?
+                </h2>
+                <p class="text-lg text-gray-600 leading-relaxed mb-4">
+                    Busty adalah platform monitoring dan manajemen pengemudi bus
+                    yang mengintegrasikan AI untuk mendeteksi kelelahan,
+                    mengatur rute perjalanan, serta memastikan keamanan dan
+                    efisiensi transportasi.
+                </p>
+                <p class="text-lg text-gray-600 leading-relaxed">
+                    Cocok untuk operator armada yang ingin sistem modern,
+                    transparan, dan berbasis data.
+                </p>
+            </div>
+        </div>
     </div>
-  </div>
 </section>
 
 <!-- Fitur Utama Section dengan Background Image, Overlay, dan Padding -->
-<section id="fitur" class="relative py-36 min-h-[500px] bg-cover bg-center bg-no-repeat"
-  style="background-image: url('/static/image/bus.png');">
-  <!-- Overlay hitam transparan -->
-  <div class="absolute inset-0 bg-black bg-opacity-60"></div>
+<section
+    id="fitur"
+    class="relative py-36 min-h-[500px] bg-cover bg-center bg-no-repeat"
+    style="background-image: url('/static/image/bus.png')"
+>
+    <!-- Overlay hitam transparan -->
+    <div class="absolute inset-0 bg-black bg-opacity-60"></div>
 
-  <div class="relative flex flex-col items-center justify-center h-full px-6 md:px-32 text-white">
-    <div class="max-w-4xl text-center mb-12">
-      <h2 class="text-4xl md:text-5xl font-bold mb-4">Fitur Utama Busty</h2>
-      <p class="text-lg leading-relaxed max-w-3xl mx-auto">
-        Solusi pintar untuk manajemen pengemudi dan perjalanan yang menggabungkan teknologi AI untuk keselamatan dan
-        efisiensi armada Anda.
-      </p>
-    </div>
+    <div
+        class="relative flex flex-col items-center justify-center h-full px-6 md:px-32 text-white"
+    >
+        <div class="max-w-4xl text-center mb-12">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4">
+                Fitur Utama Busty
+            </h2>
+            <p class="text-lg leading-relaxed max-w-3xl mx-auto">
+                Solusi pintar untuk manajemen pengemudi dan perjalanan yang
+                menggabungkan teknologi AI untuk keselamatan dan efisiensi
+                armada Anda.
+            </p>
+        </div>
 
-    <!-- Grid fitur -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-5xl w-full">
-      <div
-        class="bg-white bg-opacity-20 backdrop-blur-md rounded-2xl p-6 shadow-lg hover:bg-opacity-30 transition cursor-pointer">
-        <h3 class="text-xl font-semibold mb-3">Deteksi Ngantuk</h3>
-        <p>Mantau kondisi pengemudi secara real-time untuk menghindari kecelakaan akibat kelelahan.</p>
-      </div>
-      <div
-        class="bg-white bg-opacity-20 backdrop-blur-md rounded-2xl p-6 shadow-lg hover:bg-opacity-30 transition cursor-pointer">
-        <h3 class="text-xl font-semibold mb-3">Manajemen Rute</h3>
-        <p>Optimalkan rute perjalanan agar lebih cepat dan aman, menghindari kemacetan dan risiko.</p>
-      </div>
-      <div
-        class="bg-white bg-opacity-20 backdrop-blur-md rounded-2xl p-6 shadow-lg hover:bg-opacity-30 transition cursor-pointer">
-        <h3 class="text-xl font-semibold mb-3">Manajemen Pengemudi</h3>
-        <p>Kelola data dan jadwal pengemudi agar performa armada tetap maksimal.</p>
-      </div>
+        <!-- Grid fitur -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-5xl w-full">
+            <div
+                class="bg-white bg-opacity-20 backdrop-blur-md rounded-2xl p-6 shadow-lg hover:bg-opacity-30 transition cursor-pointer"
+            >
+                <h3 class="text-xl font-semibold mb-3">Deteksi Ngantuk</h3>
+                <p>
+                    Mantau kondisi pengemudi secara real-time untuk menghindari
+                    kecelakaan akibat kelelahan.
+                </p>
+            </div>
+            <div
+                class="bg-white bg-opacity-20 backdrop-blur-md rounded-2xl p-6 shadow-lg hover:bg-opacity-30 transition cursor-pointer"
+            >
+                <h3 class="text-xl font-semibold mb-3">Manajemen Rute</h3>
+                <p>
+                    Optimalkan rute perjalanan agar lebih cepat dan aman,
+                    menghindari kemacetan dan risiko.
+                </p>
+            </div>
+            <div
+                class="bg-white bg-opacity-20 backdrop-blur-md rounded-2xl p-6 shadow-lg hover:bg-opacity-30 transition cursor-pointer"
+            >
+                <h3 class="text-xl font-semibold mb-3">Manajemen Pengemudi</h3>
+                <p>
+                    Kelola data dan jadwal pengemudi agar performa armada tetap
+                    maksimal.
+                </p>
+            </div>
+        </div>
     </div>
-  </div>
 </section>
-
 
 <!-- Testimonial -->
 <section id="testi" class="bg-gray-50 py-20 px-6 md:px-16 lg:px-32">
-  <div class="text-center mb-12">
-    <h2 class="text-4xl font-bold mb-4">Apa Kata Pengguna</h2>
-  </div>
-  <div class="flex flex-col md:flex-row justify-center gap-10">
-    <div class="bg-white p-6 rounded-xl shadow-md w-full md:w-1/3">
-      <p class="text-gray-600 mb-4">"Busty sangat membantu dalam memantau kondisi pengemudi dan menghindari kelelahan
-        saat perjalanan."</p>
-      <p class="font-bold text-blue-800">Rani - Pengemudi Bus</p>
+    <div class="text-center mb-12">
+        <h2 class="text-4xl font-bold mb-4">Apa Kata Pengguna</h2>
     </div>
-    <div class="bg-white p-6 rounded-xl shadow-md w-full md:w-1/3">
-      <p class="text-gray-600 mb-4">"Sekarang manajemen rute jadi lebih tertata. Fitur dashboardnya intuitif banget."
-      </p>
-      <p class="font-bold text-blue-800">Arif - Manajer Armada</p>
+    <div class="flex flex-col md:flex-row justify-center gap-10">
+        <div class="bg-white p-6 rounded-xl shadow-md w-full md:w-1/3">
+            <p class="text-gray-600 mb-4">
+                "Busty sangat membantu dalam memantau kondisi pengemudi dan
+                menghindari kelelahan saat perjalanan."
+            </p>
+            <p class="font-bold text-blue-800">Rani - Pengemudi Bus</p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-md w-full md:w-1/3">
+            <p class="text-gray-600 mb-4">
+                "Sekarang manajemen rute jadi lebih tertata. Fitur dashboardnya
+                intuitif banget."
+            </p>
+            <p class="font-bold text-blue-800">Arif - Manajer Armada</p>
+        </div>
     </div>
-  </div>
 </section>
 
 <!-- Cara Menggunakan -->
 <section id="tutorial" class="py-20 px-6 md:px-16 lg:px-32 bg-gray-100">
-  <div class="text-center mb-14">
-    <h2 class="text-4xl font-bold">Cara Menggunakan Busty</h2>
-  </div>
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-10 text-center">
-    <div class="bg-white p-6 rounded-xl shadow-md">
-      <div class="text-blue-600 text-3xl font-bold mb-4">1</div>
-      <h3 class="text-xl font-semibold mb-2">Login</h3>
-      <p class="text-gray-600">Masuk sebagai pengemudi atau manajer untuk memulai pemantauan.</p>
+    <div class="text-center mb-14">
+        <h2 class="text-4xl font-bold">Cara Menggunakan Busty</h2>
     </div>
-    <div class="bg-white p-6 rounded-xl shadow-md">
-      <div class="text-blue-600 text-3xl font-bold mb-4">2</div>
-      <h3 class="text-xl font-semibold mb-2">Pantau Rute</h3>
-      <p class="text-gray-600">Lihat kondisi rute dan pengemudi secara real-time melalui dashboard.</p>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-10 text-center">
+        <div class="bg-white p-6 rounded-xl shadow-md">
+            <div class="text-blue-600 text-3xl font-bold mb-4">1</div>
+            <h3 class="text-xl font-semibold mb-2">Login</h3>
+            <p class="text-gray-600">
+                Masuk sebagai pengemudi atau manajer untuk memulai pemantauan.
+            </p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-md">
+            <div class="text-blue-600 text-3xl font-bold mb-4">2</div>
+            <h3 class="text-xl font-semibold mb-2">Pantau Rute</h3>
+            <p class="text-gray-600">
+                Lihat kondisi rute dan pengemudi secara real-time melalui
+                dashboard.
+            </p>
+        </div>
+        <div class="bg-white p-6 rounded-xl shadow-md">
+            <div class="text-blue-600 text-3xl font-bold mb-4">3</div>
+            <h3 class="text-xl font-semibold mb-2">Ambil Tindakan</h3>
+            <p class="text-gray-600">
+                Gunakan data untuk mengambil keputusan terbaik bagi armada.
+            </p>
+        </div>
     </div>
-    <div class="bg-white p-6 rounded-xl shadow-md">
-      <div class="text-blue-600 text-3xl font-bold mb-4">3</div>
-      <h3 class="text-xl font-semibold mb-2">Ambil Tindakan</h3>
-      <p class="text-gray-600">Gunakan data untuk mengambil keputusan terbaik bagi armada.</p>
-    </div>
-  </div>
 </section>
 
 {% endblock %}

@@ -1,0 +1,146 @@
+<!-- templates/cms/cmsbase.html -->
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dashboard CMS{% endblock %}</title>
+    <link rel="icon" href="{{ url_for('static', filename='image/busty.png') }}" type="image/png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+
+    <!-- CDN Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- tailwind config langsung di inline -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                        jakarta: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</head>
+
+<body class="bg-gray-100 font-jakarta">
+
+    <!-- Sidebar Container -->
+    <div class="flex">
+        <!-- Sidebar -->
+        <div
+            class="bg-white text-gray-900 w-60 h-screen fixed top-0 left-0 flex flex-col justify-between shadow-lg">
+            <div class="p-6">
+                <h2 class="text-xl font-semibold text-blue-800">Admin CMS</h2>
+                <ul class="mt-8 space-y-4">
+                    <!-- Dashboard Menu Item -->
+                    <li>
+                        <a href="{{ url_for('main.dashboard') }}"
+                            class="group flex items-center text-md space-x-3 py-2  rounded-md transition-colors">
+                            <!-- Icon -->
+                            <img src="{{ url_for('static', filename='image/asethome.svg') }}" alt="Dashboard Icon"
+                                class="w-4 h-4 object-contain group-hover:brightness-110 transition" />
+                            <span class="">Dashboard</span>
+                        </a>
+                    </li>
+                    <!-- Posts Menu Item -->
+                    <li>
+                        <a href="{{ url_for('main.detail_cuaca') }}"
+                            class="group flex items-center text-md space-x-3 py-2 rounded-md transition-colors">
+                            <!-- Icon -->
+                            <img src="{{ url_for('static', filename='image/asetweather.svg') }}" alt="Dashboard Icon"
+                                class="w-4 h-4 object-contain group-hover:brightness-110 transition" />
+                            <span>Detail Cuaca</span>
+                        </a>
+                    </li>
+                    <!-- Editor Menu Item -->
+                    <li>
+                        <a href="{{url_for('main.list_pengguna')}}"
+                            class="group flex items-center text-md space-x-3 py-2  rounded-md transition-colors">
+                            <!-- Icon -->
+                            <img src="{{ url_for('static', filename='image/asetuser.svg') }}" alt="Dashboard Icon"
+                                class="w-4 h-4 object-contain group-hover:brightness-110 transition" />
+                            <span>Pengguna</span>
+                        </a>
+                    </li>
+                    <!-- Settings Menu Item -->
+                    <li>
+                        <a href="{{url_for('main.jadwal')}}"
+                            class="group flex items-center text-md space-x-3 py-2  rounded-md transition-colors">
+                            <!-- Icon -->
+                            <img src="{{ url_for('static', filename='image/schedule.svg') }}" alt="Dashboard Icon"
+                                class="w-4 h-4 object-contain group-hover:brightness-110 transition" />
+                            <span>Jadwal</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{url_for('main.list_rute')}}"
+                            class="group flex items-center text-md space-x-3 py-2  rounded-md transition-colors">
+                            <!-- Icon -->
+                            <img src="{{ url_for('static', filename='image/rute.svg') }}" alt="Dashboard Icon"
+                                class="w-4 h-4 object-contain group-hover:brightness-110 transition" />
+                            <span>Rute</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{url_for('main.list_armada')}}"
+                            class="group flex items-center text-md space-x-3 py-2  rounded-md transition-colors">
+                            <!-- Icon -->
+                            <img src="{{ url_for('static', filename='image/bus.svg') }}" alt="Dashboard Icon"
+                                class="w-4 h-4 object-contain group-hover:brightness-110 transition" />
+                            <span>Armada</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{url_for('main.list_artikel')}}"
+                            class="group flex items-center text-md space-x-3 py-2  rounded-md transition-colors">
+                            <!-- Icon -->
+                            <img src="{{ url_for('static', filename='image/article.svg') }}" alt="Dashboard Icon"
+                                class="w-4 h-4 object-contain group-hover:brightness-110 transition" />
+                            <span>Artikel</span>
+                        </a>
+                    </li>
+                    <!-- Logout Menu Item -->
+                   
+                </ul>
+            </div>
+            <!-- Bawah: Logout -->
+            <div class="p-6 py-2 border-t">
+                <a href="{{ url_for('auth.logout') }}"
+                    class="group flex items-center text-md space-x-3 py-2 rounded-md transition-colors text-red-600 hover:text-red-800">
+                    <img src="{{ url_for('static', filename='image/Logout.svg') }}" alt="Logout Icon"
+                        class="w-4 h-4 object-contain group-hover:brightness-110 transition" />
+                    <span>Logout</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-8 ml-60">
+            <!-- Page Title Box -->
+            <div class="mb-4 ">
+                <h2 class="text-2xl font-semibold text-black">{% block page_title %}Dashboard{% endblock %}</h2>
+            </div>
+
+            <!-- Content goes here -->
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+
+</body>
+
+</html>

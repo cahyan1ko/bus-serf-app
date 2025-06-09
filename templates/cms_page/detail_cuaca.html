@@ -1,0 +1,197 @@
+{% extends 'cms_page/cmsbase.html' %} {% block title %}Busty | Detail Cuaca{%
+endblock %} {% block page_title %}Detail Cuaca{% endblock %} {% block content %}
+<div class="space-y-6">
+    <p class="text-gray-600 text-base">
+        Berikut Detail Prediksi Cuaca Per Hari Ini
+    </p>
+
+    <!-- Search & Mode -->
+    <div
+        class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4"
+    >
+        <!-- Search -->
+        <form
+            method="get"
+            action="{{ url_for('main.detail_cuaca') }}"
+            class="flex w-full max-w-2xl gap-3"
+        >
+            <input
+                type="text"
+                name="search_daerah"
+                id="search_daerah"
+                value="{{ search_daerah }}"
+                placeholder="Cari daerah (kota/kab/kec/kel)..."
+                class="w-full px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-400 outline-none transition duration-200"
+            />
+            <button
+                type="submit"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md shadow-md transition duration-200"
+            >
+                Cari
+            </button>
+        </form>
+
+        <!-- View Mode Switch -->
+        <div class="flex gap-2 items-center">
+            <a
+                href="{{ url_for('main.detail_cuaca', search_daerah=search_daerah, mode='card') }}"
+                class="p-2 rounded-md border hover:bg-gray-100 transition duration-200 {% if mode == 'card' %}bg-blue-100 border-blue-400{% endif %}"
+                title="Tampilan Card"
+            >
+                <i
+                    data-lucide="layout-dashboard"
+                    class="w-5 h-5 text-gray-700"
+                ></i>
+            </a>
+            <a
+                href="{{ url_for('main.detail_cuaca', search_daerah=search_daerah, mode='chart') }}"
+                class="p-2 rounded-md border hover:bg-gray-100 transition duration-200 {% if mode == 'chart' %}bg-blue-100 border-blue-400{% endif %}"
+                title="Tampilan Grafik"
+            >
+                <i data-lucide="bar-chart-3" class="w-5 h-5 text-gray-700"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- CARD VIEW -->
+    {% if cuaca_data and mode != 'chart' %} {% set grouped_by_provinsi = {} %}
+    {% for item in cuaca_data %} {% set _ =
+    grouped_by_provinsi.setdefault(item.provinsi, []).append(item) %} {% endfor
+    %} {% for provinsi, items in grouped_by_provinsi.items() %}
+    <section>
+        <h2 class="text-xl font-semibold text-gray-800 mb-3">{{ provinsi }}</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for item in items %}
+            <div
+                class="bg-white border border-gray-200 rounded-md shadow-sm hover:shadow-md p-5 transition duration-300 space-y-2"
+            >
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800">
+                            {{ item.kelurahan }}
+                        </h3>
+                        <p class="text-sm text-gray-500">
+                            {{ item.kecamatan }} - {{ item.kab_kota }}
+                        </p>
+                    </div>
+                    <div class="text-3xl">
+                        {% if item.cuaca == "Cerah" %} ☀️ {% elif item.cuaca ==
+                        "Berawan" %} ⛅ {% elif item.cuaca == "Berawan Tebal" %}
+                        ☁️ {% elif item.cuaca == "Hujan Ringan" %} 🌦️ {% elif
+                        item.cuaca == "Hujan Sedang" %} 🌧️ {% elif item.cuaca ==
+                        "Hujan Deras" %} ⛈️ {% else %} ❓ {% endif %}
+                    </div>
+                </div>
+
+                <div
+                    class="flex justify-between text-sm text-gray-700 font-medium"
+                >
+                    <span>Suhu:</span>
+                    <span class="text-blue-600">{{ item.suhu }}°C</span>
+                </div>
+
+                <div
+                    class="flex justify-between text-sm text-gray-700 font-medium"
+                >
+                    <span>Cuaca:</span>
+                    <span>{{ item.cuaca }}</span>
+                </div>
+
+                <p class="text-xs text-gray-400 pt-2">
+                    Terakhir diperbarui: {{ item.timestamp.strftime('%d %B %Y
+                    %H:%M') if item.timestamp else 'Tidak diketahui' }}
+                </p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endfor %} {% endif %}
+
+    <!-- CHART VIEW -->
+    {% if mode == 'chart' %} {% set provinsi_grouped = {} %} {% for item in
+    cuaca_data %} {% set prov = item.provinsi %} {% set _ =
+    provinsi_grouped.setdefault(prov, {}).setdefault(item.kab_kota,
+    []).append(item) %} {% endfor %}
+
+    <div class="space-y-10">
+        {% for provinsi, kab_group in provinsi_grouped.items() %}
+        <div>
+            <h2 class="text-xl font-semibold text-gray-800 mb-3">
+                {{ provinsi }}
+            </h2>
+            {% for kab_kota, data in kab_group.items() %}
+            <div
+                class="bg-white rounded-md shadow-md p-6 mb-6 border border-gray-200"
+            >
+                <h3 class="text-lg font-medium text-gray-700 mb-2">
+                    {{ kab_kota }}
+                </h3>
+                <canvas
+                    id="chart-{{ provinsi | replace(' ', '') }}-{{ loop.index }}"
+                    height="200"
+                ></canvas>
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        {% for provinsi, kab_group in provinsi_grouped.items() %}
+        {% for kab_kota, data in kab_group.items() %}
+        const ctx_{{ provinsi | replace(' ', '') }}_{ { loop.index } } = document.getElementById('chart-{{ provinsi | replace(' ', '') }}-{{ loop.index }}').getContext('2d');
+        new Chart(ctx_{{ provinsi | replace(' ', '') }}_{{ loop.index }}, {
+          type: 'bar',
+          data: {
+            labels: {{ data | map(attribute = 'kecamatan') | list | tojson }},
+          datasets: [{
+            label: 'Suhu (°C)',
+            data: {{ data | map(attribute = 'suhu') | list | tojson }},
+          backgroundColor: 'rgba(59, 130, 246, 0.6)',
+          borderColor: 'rgba(59, 130, 246, 1)',
+          borderWidth: 1,
+          borderRadius: 8
+            }]
+          },
+          options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => ctx.raw + '°C'
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              suggestedMax: 50,
+              title: {
+                display: true,
+                text: 'Suhu (°C)',
+                font: { size: 14 }
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Kecamatan',
+                font: { size: 14 }
+              }
+            }
+          }
+        }
+        });
+        {% endfor %}
+        {% endfor %}
+    </script>
+    {% endif %}
+</div>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+    lucide.createIcons()
+</script>
+{% endblock %}
