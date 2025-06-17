@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify, session
+# from models.device_history import DeviceHistory
 from routes import generate_otp, send_otp_email
 from werkzeug.security import generate_password_hash
 from models.user import User
@@ -21,6 +22,7 @@ API_KEY = os.getenv('API_KEY')
 api = Blueprint('api', __name__, url_prefix='/api')
 client = MongoClient('mongodb+srv://user:OG2QqFuCYwkoWBek@capstone.fqvkpyn.mongodb.net/?retryWrites=true&w=majority')
 db = client['busty_db']
+history_collection = db['history_devices']
 dbcuaca = client['cuaca_db']
 user_model = User(db)
 SECRET_KEY = 'busty_secret_key'
@@ -29,7 +31,6 @@ SECRET_KEY = 'busty_secret_key'
 def require_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        # Cek API Key
         api_key = request.headers.get('x-api-key')
         if not api_key or api_key != API_KEY:
             return jsonify({'error': 'Unauthorized - Invalid or missing API key'}), 401
@@ -49,6 +50,8 @@ def require_auth(f):
 
         return f(*args, **kwargs)
     return decorated
+
+# API Protect =============================================================================================================================
 
 @api.route('/protected', methods=['GET'])
 @require_auth
@@ -93,8 +96,7 @@ def protected_route(current_user):
         }
     })
 
-
-# api register
+# API Register Manual =============================================================================================================================
 
 @api.route('/register', methods=['POST'])
 def api_register():
@@ -198,6 +200,7 @@ def api_register():
 
     return jsonify({'status': 'pending', 'message': 'OTP telah dikirim ke email kamu.'}), 200
 
+# API Verify OTP =============================================================================================================================
 
 @api.route('/verify-otp', methods=['POST'])
 def api_verify_otp():
@@ -283,6 +286,7 @@ def api_verify_otp():
 
     return jsonify({'status': 'success', 'message': 'Akun berhasil diverifikasi.'}), 200
 
+# API Resend Otp =============================================================================================================================
 
 @api.route('/resend-otp', methods=['POST'])
 def resend_otp():
@@ -362,6 +366,7 @@ def resend_otp():
     send_otp_email(email, new_otp, expiry_minutes=5)
     return jsonify({'status': 'success', 'message': 'OTP baru telah dikirim.'}), 200
 
+# API Login Manual =============================================================================================================================
 
 @api.route('/login', methods=['POST'])
 def api_login():
@@ -414,8 +419,19 @@ def api_login():
     }
     token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
 
-    return jsonify({'status': 'success', 'token': token}), 200
+    return jsonify({
+      'status': 'success',
+      'token': token,
+      'user': {
+          'id': str(user['_id']),
+          'username': user.get('username', ''),
+          'email': user.get('email', ''),
+          'hasPassword': 'password' in user
+      }
+  }), 200
 
+
+# API Google Login =============================================================================================================================
 
 @api.route('/google-login', methods=['POST'])
 def login_with_google():
@@ -514,62 +530,107 @@ def login_with_google():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# API Rute =============================================================================================================================
+@api.route('/rute/user/<user_id>', methods=['GET'])
+def get_rute_by_user(user_id):
+    try:
+        rutes = db['rute_operasional'].find({'user_id': user_id})
+        result = []
+        for rute in rutes:
+            result.append({
+                "_id": str(rute['_id']),
+                "terminal_awal": rute.get("terminal_awal"),
+                "terminal_tujuan": rute.get("terminal_tujuan"),
+                "tanggal": rute.get("tanggal"),
+                "jam": rute.get("jam"),
+                "jumlah_penumpang": rute.get("jumlah_penumpang"),
+                "armada_id": rute.get("armada_id"),
+                "nama_bus": rute.get("nama_bus"),
+                "nopol": rute.get("nopol"),
+                "created_at": rute.get("created_at").isoformat() if rute.get("created_at") else None
+            })
 
-
-@api.route('/data-cuaca', methods=['GET'])
-@require_auth
-def get_data_cuaca():
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'message': 'Terjadi kesalahan', 'error': str(e)}), 500
     
-    """
-    Ambil data prakiraan cuaca (auth required)
-    ---
-    tags:
-      - Cuaca
-    parameters:
-      - name: search_daerah
-        in: query
-        type: string
-        required: false
-        description: Nama kab/kota, kecamatan, atau kelurahan untuk filter pencarian
-    security:
-      - ApiKeyAuth: []
-      - BearerAuth: []
-    responses:
-      200:
-        description: Daftar data cuaca
-        schema:
-          type: array
-          items:
-            type: object
-            properties:
-              _id:
-                type: string
-              kab_kota:
-                type: string
-              kecamatan:
-                type: string
-              kelurahan:
-                type: string
-              suhu:
-                type: integer
-      401:
-        description: Token atau API Key tidak valid
-    """
+@api.route('/device-history', methods=['POST'])
+def save_device_history():
+    try:
+        data = request.get_json()
+
+        user_id = data.get('user_id')
+        device_name = data.get('device_name')
+        device_os = data.get('device_os')
+        device_id = data.get('device_id')
+
+        if not all([user_id, device_name, device_os, device_id]):
+            return jsonify({
+                'status': 'error',
+                'message': 'Semua field wajib diisi.'
+            }), 400
+
+        device_data = {
+            'user_id': user_id,
+            'device_name': device_name,
+            'device_os': device_os,
+            'device_id': device_id,
+            'login_time': datetime.utcnow()
+        }
+
+        db.history_devices.insert_one(device_data)
+
+        return jsonify({
+            'status': 'success',
+            'message': 'Data perangkat berhasil disimpan.'
+        }), 201
+
+    except Exception as e:
+        # Cetak error ke terminal dan kirim ke client
+        print(f"Error: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Server error: {str(e)}'
+        }), 500
     
-    search = request.args.get('search_daerah', '').lower()
-    cuaca_data = list(dbcuaca['prakiraan_cuaca'].find())
+@api.route('/device-history/<user_id>', methods=['GET'])
+def get_device_history(user_id):
+    try:
+        histories = list(db.history_devices.find({'user_id': user_id}).sort('login_time', -1))
+        
+        for history in histories:
+            history['_id'] = str(history['_id'])
+            history['login_time'] = history['login_time'].isoformat() + 'Z'
 
-    for data in cuaca_data:
-        data['_id'] = str(data['_id'])
-        data['suhu'] = int(data['suhu'].split()[0])
+        return jsonify(histories), 200
 
-    if search:
-        cuaca_data = [
-            data for data in cuaca_data
-            if search in data.get('kab_kota', '').lower() 
-            or search in data.get('kecamatan', '').lower()
-            or search in data.get('kelurahan', '').lower()
-        ]
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Server error: {str(e)}'
+        }), 500
 
-    return jsonify(cuaca_data), 200
+@api.route('/update_location', methods=['POST'])
+def update_location():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    lat = data.get('lat')
+    lng = data.get('lng')
 
+    if not user_id or lat is None or lng is None:
+        return jsonify({"message": "user_id, lat, dan lng harus diisi"}), 400
+
+    db.latest_location.update_one(
+        {'user_id': user_id},
+        {
+            '$set': {
+                'lat': lat,
+                'lng': lng,
+                'timestamp': datetime.utcnow()
+            }
+        },
+        upsert=True
+    )
+
+    return jsonify({"message": "Koordinat berhasil disimpan/diupdate"}), 200

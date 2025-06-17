@@ -42,7 +42,6 @@ def send_otp_email(email, otp, expiry_minutes=1):
     '''
     mail.send(msg)
 
-
 def check_latest_email():
     with MailBox('imap.gmail.com').login(email_user, email_pass, 'INBOX') as mailbox:
         emails = list(mailbox.fetch(AND(seen=False), limit=1, reverse=True))
@@ -74,7 +73,6 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
 
-        # Cari user berdasarkan email
         user = user_model.find_by_email(email)
 
         if not user:
@@ -82,7 +80,6 @@ def login():
             return redirect(url_for('auth.login'))
         
         if user and check_password_hash(user['password'], password):
-        # Login berhasil
             session['user_id'] = str(user['_id'])
             session['username'] = user['username']
             flash(f'Selamat datang, {user["username"]}!', 'success')
@@ -116,7 +113,6 @@ def register():
         otp = generate_otp()
         expired_time = datetime.utcnow() + timedelta(minutes=1)
 
-        # Simpan langsung ke DB (belum verified)
         user_model.create_user(
             username,
             email,
@@ -126,7 +122,7 @@ def register():
             expired_time
         )
 
-        session['email_temp'] = email  # buat tracking verifikasi nanti
+        session['email_temp'] = email
 
         send_otp_email(email, otp, 1)
 
@@ -135,7 +131,6 @@ def register():
 
     return render_template('auth/register.html')
 
-# Register Google OAuth
 @auth.route('/register-google')
 def register_google():
     redirect_uri = url_for('auth.google_callback', _external=True)
@@ -148,19 +143,17 @@ def google_callback():
     user_info = resp.json()
 
     email = user_info.get('email')
-    username = user_info.get('name')  # Bisa juga pakai 'given_name'
+    username = user_info.get('name')
 
-    # Cek apakah user sudah terdaftar
     existing_user = user_model.find_by_email(email)
     if existing_user:
         flash('Email sudah terdaftar. Silakan login.', 'info')
         return redirect(url_for('auth.login'))
 
-    # Simpan ke database dengan status langsung terverifikasi
     user_model.create_user(
         username=username,
         email=email,
-        password=None,  # Karena dari Google OAuth
+        password=None,
         otp=None,
         otp_expired=None,
         is_verified=True
@@ -404,21 +397,15 @@ def tambah_rute():
         })
 
         flash("Data armada berhasil ditambahkan.", "success")
-        return redirect(url_for('main.list_rute'))  # Ganti ke route list kalau ada
+        return redirect(url_for('main.list_rute'))
 
     return render_template('cms_page/rute/tambah_rute.html')
-
-
-
-
 # Route Armada
 
 @main.route('/armada')
 def list_armada():
     search_nama = request.args.get('search_nama', '').lower()
     armada_data = list(db['armada'].find())
-
-    # filter berdasarkan pencarian nama bus atau nopol
     if search_nama:
         armada_data = [
             item for item in armada_data
@@ -441,7 +428,6 @@ def tambah_armada():
             flash("Harap isi semua data yang diperlukan.", "error")
             return redirect(url_for('main.tambah_armada'))
 
-        # Simpan ke MongoDB
         db['armada'].insert_one({
             'nopol': nopol,
             'nama_bus': nama_bus,
@@ -451,7 +437,7 @@ def tambah_armada():
         })
 
         flash("Data armada berhasil ditambahkan.", "success")
-        return redirect(url_for('main.list_armada'))  # Ganti ke route list kalau ada
+        return redirect(url_for('main.list_armada'))
 
     return render_template('cms_page/armada/tambah_armada.html')
 
@@ -525,22 +511,18 @@ def update_armada():
 def list_artikel():
     search_judul = request.args.get('search_judul', '').lower()
     artikel_data = list(db['artikel'].find())
-
-    # filter berdasarkan pencarian nama bus atau nopol
     if search_judul:
         artikel_data = [
             item for item in artikel_data
             if search_judul in item.get('judul', '').lower() or
                search_judul in item.get('created_at', '').lower()
         ]
-
     return render_template('cms_page/artikel/artikel.html', artikel_data=artikel_data)
-
 
 @main.route('/tambah-artikel', methods=['GET', 'POST'])
 def tambah_artikel():
     if request.method == 'POST':
-        image_file = request.files.get('image')  # ambil file gambar
+        image_file = request.files.get('image')
         judul = request.form.get('judul')
         sub_judul = request.form.get('sub_judul')
         konten = request.form.get('konten')
@@ -549,12 +531,10 @@ def tambah_artikel():
             flash("Harap isi semua data yang diperlukan.", "error")
             return redirect(url_for('main.tambah_artikel'))
 
-        # Simpan file gambar ke folder static/image
         filename = secure_filename(image_file.filename)
         filepath = os.path.join('static/image', filename)
         image_file.save(filepath)
 
-        # Simpan nama file-nya aja ke database
         db['artikel'].insert_one({
             'image': filename,
             'judul': judul,
