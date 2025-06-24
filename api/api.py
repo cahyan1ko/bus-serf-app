@@ -611,16 +611,34 @@ def get_device_history(user_id):
             'message': f'Server error: {str(e)}'
         }), 500
 
-@api.route('/update_location', methods=['POST'])
-def update_location():
+@api.route('/tracking', methods=['POST'])
+def tracking():
     data = request.get_json()
     user_id = data.get('user_id')
     lat = data.get('lat')
     lng = data.get('lng')
+    label_detection = data.get('label_detection')
 
     if not user_id or lat is None or lng is None:
         return jsonify({"message": "user_id, lat, dan lng harus diisi"}), 400
 
+    # Cari rute dengan status "off" ATAU "ongoing"
+    rute = db.rute_operasional.find_one({
+        'user_id': user_id,
+        'status': {'$in': ['off', 'ongoing']}
+    })
+
+    if not rute:
+        return jsonify({"message": "Tidak ada rute aktif ditemukan untuk user ini"}), 404
+
+    # Kalau status masih "off", ubah ke "ongoing"
+    if rute['status'] == 'off':
+        db.rute_operasional.update_one(
+            {'_id': rute['_id']},
+            {'$set': {'status': 'ongoing'}}
+        )
+
+    # Update koordinat terakhir
     db.latest_location.update_one(
         {'user_id': user_id},
         {
@@ -633,4 +651,35 @@ def update_location():
         upsert=True
     )
 
-    return jsonify({"message": "Koordinat berhasil disimpan/diupdate"}), 200
+    # Simpan history deteksi
+    db.history_detection.insert_one({
+        'user_id': user_id,
+        'rute_id': rute['_id'],
+        'label_detection': label_detection,
+        'timestamp': datetime.utcnow()
+    })
+
+    return jsonify({"message": "Data tracking disimpan"}), 200
+
+@api.route('/stop-tracking', methods=['POST'])
+def stop_tracking():
+    data = request.get_json()
+    user_id = data.get('user_id')
+
+    if not user_id:
+        return jsonify({"message": "user_id harus diisi"}), 400
+
+    rute = db.rute_operasional.find_one({
+        'user_id': user_id,
+        'status': "ongoing"
+    })
+
+    if not rute:
+        return jsonify({"message": "Rute dengan status 'ongoing' tidak ditemukan"}), 404
+
+    db.rute_operasional.update_one(
+        {'_id': rute['_id']},
+        {'$set': {'status': 'finish', 'kedatangan': datetime.utcnow()}}
+    )
+
+    return jsonify({"message": "Tracking dihentikan, status diubah ke 'finish'"}), 200
