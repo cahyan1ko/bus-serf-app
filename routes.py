@@ -65,7 +65,7 @@ def extract_otp(email_text):
 
 @main.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', year=datetime.now().year)
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():

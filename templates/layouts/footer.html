@@ -1,0 +1,111 @@
+<footer class="bg-[#e25353] text-white pt-10 pb-6">
+    <div
+        class="max-w-[1200px] mx-auto px-6 md:px-16 grid grid-cols-1 md:grid-cols-3 gap-10"
+    >
+        <!-- Kolom 1: Logo dan Deskripsi -->
+        <div class="flex flex-col items-start">
+            <img
+                src="{{ url_for('static', filename='images/travion_logo.png') }}"
+                alt="Travion Logo"
+                class="h-24 mb-4"
+            />
+            <p class="text-sm leading-relaxed text-white/90 max-w-xs">
+                Platform cerdas berbasis AI untuk meningkatkan keselamatan dan
+                efisiensi armada transportasi Anda.
+            </p>
+        </div>
+
+        <!-- Kolom 2: Navigasi -->
+        <div>
+            <h3 class="text-lg font-semibold mb-4">Navigasi</h3>
+            <ul class="space-y-2 text-sm text-white/90">
+                <li>
+                    <a href="#home" class="hover:text-white transition"
+                        >Beranda</a
+                    >
+                </li>
+                <li>
+                    <a href="#about" class="hover:text-white transition"
+                        >Tentang</a
+                    >
+                </li>
+                <li>
+                    <a href="#fitur" class="hover:text-white transition"
+                        >Fitur</a
+                    >
+                </li>
+                <li>
+                    <a href="#testi" class="hover:text-white transition"
+                        >Testimoni</a
+                    >
+                </li>
+                <li>
+                    <a href="#tutorial" class="hover:text-white transition"
+                        >Tutorial</a
+                    >
+                </li>
+            </ul>
+        </div>
+
+        <!-- Kolom 3: Kontak dan Media Sosial -->
+        <div>
+            <h3 class="text-lg font-semibold mb-4">Kontak</h3>
+            <ul class="text-sm text-white/90 space-y-2">
+                <li>
+                    Email:
+                    <a href="mailto:support@travion.com" class="hover:underline"
+                        >support@travion.com</a
+                    >
+                </li>
+                <li>
+                    Telepon:
+                    <a href="tel:+6287700143282" class="hover:underline"
+                        >+62 877-0014-3282</a
+                    >
+                </li>
+                <li>
+                    Alamat: Jl. Citarum, Mintaragen, Tegal Timur, Kota Tegal,
+                    jawa Tengah, Indonesia.
+                </li>
+            </ul>
+
+            <div class="flex gap-4 mt-4 text-xl">
+                <a
+                    href="#"
+                    class="hover:text-white transition"
+                    aria-label="Facebook"
+                >
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                <a
+                    href="#"
+                    class="hover:text-white transition"
+                    aria-label="Instagram"
+                >
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a
+                    href="#"
+                    class="hover:text-white transition"
+                    aria-label="LinkedIn"
+                >
+                    <i class="fab fa-linkedin-in"></i>
+                </a>
+                <a
+                    href="#"
+                    class="hover:text-white transition"
+                    aria-label="Twitter"
+                >
+                    <i class="fab fa-x-twitter"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Bottom -->
+    <div
+        class="border-t border-white/30 mt-10 pt-4 text-center text-sm text-white/80"
+    >
+        &copy; {{ year }} Travion. All rights reserved.
+    </div>
+</footer>

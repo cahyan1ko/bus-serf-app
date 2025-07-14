@@ -42,7 +42,7 @@ def require_auth(f):
         token = auth_header.split(' ')[1]
         try:
             payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-            request.user_id = payload['user_id']  # Bisa dipakai di route
+            request.user_id = payload['user_id'] 
         except jwt.ExpiredSignatureError:
             return jsonify({'error': 'Token expired'}), 401
         except jwt.InvalidTokenError:
@@ -419,16 +419,25 @@ def api_login():
     }
     token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
 
-    return jsonify({
-      'status': 'success',
-      'token': token,
-      'user': {
-          'id': str(user['_id']),
-          'username': user.get('username', ''),
-          'email': user.get('email', ''),
-          'hasPassword': 'password' in user
-      }
-  }), 200
+    response = {
+    'status': 'success',
+    'token': token,
+    'user': {
+        'id': str(user['_id']),
+        'username': user.get('username', ''),
+        'email': user.get('email', ''),
+        'hasPassword': user.get('password') is not None,
+        'no_hp': user.get('no_hp', ''),
+        'alamat': user.get('alamat', '')
+    }
+}
+
+    print("DEBUG: response JSON ->", response)
+
+    return jsonify(response)
+
+
+
 
 
 # API Google Login =============================================================================================================================
@@ -516,14 +525,17 @@ def login_with_google():
         jwt_token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
 
         return jsonify({
-            'token': jwt_token,
-            'user': {
-                'id': str(user['_id']),
-                'username': user.get('username'),
-                'email': user.get('email'),
-                'has_password': bool(user.get('password'))
-            }
-        })
+          'token': jwt_token,
+          'user': {
+              'id': str(user['_id']),
+              'username': user.get('username'),
+              'email': user.get('email'),
+              'hasPassword': user.get('password') is not None,
+              'no_hp': user.get('no_hp', ''),
+              'alamat': user.get('alamat', '')
+          }
+      })
+
 
     except ValueError:
         return jsonify({'error': 'Token Google tidak valid'}), 400
@@ -683,3 +695,158 @@ def stop_tracking():
     )
 
     return jsonify({"message": "Tracking dihentikan, status diubah ke 'finish'"}), 200
+
+@api.route('/riwayat-operasional', methods=['POST'])
+def riwayat_operasional():
+    data = request.get_json()
+    user_id = data.get('user_id')
+
+    if not user_id:
+        return jsonify({"message": "user_id harus disediakan"}), 400
+
+    # Ambil semua rute milik user
+    rute_list = list(db.rute_operasional.find({'user_id': user_id}))
+
+    if not rute_list:
+        return jsonify({"message": "Tidak ada riwayat operasional untuk user ini"}), 404
+
+    hasil = []
+
+    for rute in rute_list:
+        rute_id = rute['_id']
+
+        # Ambil semua deteksi untuk rute dan user tersebut
+        deteksi = list(db.history_detection.find({
+            'rute_id': rute_id,
+            'user_id': user_id
+        }))
+
+        hasil.append({
+            "rute_operasional_id": str(rute_id),
+            "terminal_awal": rute.get('terminal_awal', ''),
+            "terminal_tujuan": rute.get('terminal_tujuan', ''),
+            "tanggal": rute.get('tanggal', ''),
+            "nama_bus": rute.get('nama_bus', ''),
+            "nopol": rute.get('nopol', ''),
+            "jumlah_penumpang": rute.get('jumlah_penumpang', 0),
+            "kedatangan": rute.get('kedatangan', ''),
+            "status": rute.get('status', ''),
+            "deteksi": [
+                {
+                    "label_detection": d.get('label_detection', ''),
+                    "timestamp": d.get('timestamp')
+                } for d in deteksi
+            ]
+        })
+
+    return jsonify({
+        "message": "Riwayat operasional berhasil diambil",
+        "data": hasil
+    }), 200
+
+@api.route('/artikel', methods=['GET'])
+def get_artikel():
+    try:
+        artikels = db.artikel.find()
+        result = []
+        for artikel in artikels:
+            result.append({
+                "artikel_id": str(artikel["_id"]),
+                "judul": artikel.get("judul", ""),
+                "gambar": artikel.get("gambar", ""),
+                "konten": artikel.get("konten", "")
+            })
+        return jsonify(result)
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+@api.route('/artikel/<string:artikel_id>', methods=['GET'])
+def get_artikel_detail(artikel_id):
+    try:
+        artikel = db.artikel.find_one({'_id': ObjectId(artikel_id)})
+        if artikel is None:
+            return jsonify({"message": "Artikel tidak ditemukan"}), 404
+
+        artikel['_id'] = str(artikel['_id'])
+
+        return jsonify({
+            "artikel_id": str(artikel['_id']),
+            "judul": artikel.get('judul', ''),
+            "gambar": artikel.get('gambar', ''),
+            "konten": artikel.get('konten', '')
+        }), 200
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': f'Server error: {str(e)}'
+        }), 500
+    
+@api.route('/edit-profil', methods=['PUT'])
+def edit_profil():
+    """
+    Edit nomor HP dan/atau alamat pengguna
+    ---
+    tags:
+      - Profil
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          id: EditProfil
+          required:
+            - user_id
+          properties:
+            user_id:
+              type: string
+              example: "60e6f9fe2f9b256b9c4d1b1e"
+            nomor_hp:
+              type: string
+              example: "085712345678"
+            alamat:
+              type: string
+              example: "Jl. Merdeka No. 1"
+    responses:
+      200:
+        description: Profil berhasil diperbarui
+      400:
+        description: Permintaan tidak valid
+    """
+    data = request.get_json()
+
+    user_id = data.get('user_id')
+    nomor_hp = data.get('nomor_hp')
+    alamat = data.get('alamat')
+
+    if not user_id:
+        return jsonify({'status': 'error', 'message': 'User ID diperlukan.'}), 400
+
+    if not nomor_hp and not alamat:
+        return jsonify({'status': 'error', 'message': 'Tidak ada data yang dikirim.'}), 400
+
+    update_data = {}
+    if nomor_hp:
+        update_data['no_hp'] = nomor_hp
+    if alamat:
+        update_data['alamat'] = alamat
+
+    try:
+        result = db.user.update_one(
+            {'_id': ObjectId(user_id)},
+            {'$set': update_data}
+        )
+
+        if result.matched_count == 0:
+            return jsonify({'status': 'error', 'message': 'User tidak ditemukan.'}), 404
+
+        if result.modified_count == 0:
+            return jsonify({'status': 'warning', 'message': 'Tidak ada perubahan data.'}), 200
+
+        return jsonify({'status': 'success', 'message': 'Profil berhasil diperbarui.'}), 200
+
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
